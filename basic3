@@ -1,0 +1,112 @@
+To clean up the code using routers, we'll:
+
+Separate Routes:
+Create a router for /admin.
+Create a router for /shop.
+Add Middleware for unmatched routes to return a 404 with status code 404.
+File Organization:
+Use separate route files (admin.js and shop.js).
+Main Application:
+Import the routers in the main file (app.js).
+File Structure
+
+project/
+├── app.js          # Main server file
+├── routes/
+│   ├── admin.js    # Admin-related routes
+│   ├── shop.js     # Shop-related routes
+1. Create /routes/admin.js
+
+
+const express = require('express');
+const router = express.Router();
+
+// Route to display the form
+router.get('/add-product', (req, res) => {
+  res.send(`
+    <form action="/admin/add-product" method="POST">
+      <label for="product-name">Product Name:</label>
+      <input type="text" id="product-name" name="productName" required>
+      <br><br>
+      <label for="product-size">Product Size:</label>
+      <input type="text" id="product-size" name="productSize" required>
+      <br><br>
+      <button type="submit">Submit</button>
+    </form>
+  `);
+});
+
+// Route to handle form submission
+router.post('/add-product', (req, res) => {
+  const { productName, productSize } = req.body;
+  console.log('Product Name:', productName);
+  console.log('Product Size:', productSize);
+  res.send('Product added successfully!');
+});
+
+module.exports = router;
+2. Create /routes/shop.js
+
+const express = require('express');
+const router = express.Router();
+
+// Shop homepage
+router.get('/', (req, res) => {
+  res.send('<h1>Welcome to the Shop!</h1>');
+});
+
+module.exports = router;
+3. Update /app.js
+
+const express = require('express');
+const bodyParser = require('express').urlencoded;
+
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+
+const app = express();
+
+// Middleware to parse incoming form data
+app.use(bodyParser({ extended: true }));
+
+// Use /admin routes with the /admin prefix
+app.use('/admin', adminRoutes);
+
+// Use /shop routes with the /shop prefix
+app.use('/shop', shopRoutes);
+
+// Handle 404 errors for unmatched routes
+app.use((req, res) => {
+  res.status(404).send('<h1>Page Not Found</h1>');
+});
+
+// Start the server
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+Functionality Breakdown
+Router Cleanup:
+
+/admin/add-product routes are handled in admin.js.
+/shop routes are handled in shop.js.
+404 Middleware:
+
+Added a middleware at the end of all routes to handle unmatched URLs.
+Responds with 404 status and an error message.
+Route Filtering:
+
+/admin prefix routes are separated for administrative tasks (e.g., adding products).
+/shop prefix routes are separated for customer-related pages.
+Testing the Application
+Run the server:
+
+
+node app.js
+Test Routes:
+
+Visit /admin/add-product to see the form.
+Submit the form to log the inputs in the terminal.
+Visit /shop to see the shop homepage.
+Test 404 Handling:
+
+Visit an undefined route like /random and see the "Page Not Found" 
